@@ -5,7 +5,8 @@
 
 #include "FFSource.h"
 #include "FFDecoder.h"
-#include "SDLDisplay.h"
+
+#include "PacketQueue.h"
 
 namespace simple_player {
     class FFPlayer {
@@ -15,12 +16,11 @@ namespace simple_player {
         bool open(const std::string &url);
         bool play();
         bool close();
-        bool send_packet(AVPacket*);
 
     private:
-        SDLDisplay *display_;
+
         FFDecoder *decoder_;
         FFSource *source_;
-        std::list<AVPacket*> pkt_queue_;
+        PacketQueue<AVPacket*> pkt_queue_;
     };
 }

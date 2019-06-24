@@ -8,6 +8,7 @@
 
 namespace simple_player {
     FFDecoder::FFDecoder() {
+        display_ = new SDLDisplay();
     }
 
     FFDecoder::~FFDecoder() {
@@ -18,6 +19,7 @@ namespace simple_player {
     }
 
     bool FFDecoder::open(enum AVCodecID codec_id, const AVCodecParameters *par) {
+        display_->init();
         codec_id_ = codec_id;
         AVCodec* codec = avcodec_find_decoder(codec_id_);
         if (codec == nullptr) {
@@ -43,12 +45,6 @@ namespace simple_player {
             return false;
         }
 
-        frame_ = av_frame_alloc();
-        if (frame_ == nullptr) {
-            fprintf(stderr, "[video_player] Error: pFrame alloc fail! ERROR!\n");
-            return false;
-        }
-
         return true;
     }
 
@@ -61,28 +57,30 @@ namespace simple_player {
     }
 
     void FFDecoder::receive_packet(AVPacket *pkt) {
+        if(pkt == nullptr) {
+            return ;
+        }
 
+        int ret = avcodec_send_packet(av_codec_ctx_, pkt);
+        if (0 != ret) {
+            fprintf(stderr, "[video_player] Error: avcodec_send_packet failed! ret = %d\n", ret);
+            return ;
+        }
+
+        av_packet_free(&pkt);
+
+        AVFrame *frame = av_frame_alloc();
+        if (frame == nullptr) {
+            fprintf(stderr, "[video_player] Error: pFrame alloc fail! ERROR!\n");
+            return ;
+        }
+
+        ret = avcodec_receive_frame(av_codec_ctx_, frame);
+        if (0 != ret) {
+            fprintf(stderr, "[video_player] Error: avcodec_receive_frame failed! ret = %d\n", ret);
+            return ;
+        }
+
+        frame_queue_.send_packet(frame);
     }
-
-//    AVFrame* FFDecoder::receive_packet(AVPacket *pkt) {
-//        if(pkt == nullptr) {
-//            return nullptr;
-//        }
-//
-//        int ret = avcodec_send_packet(av_codec_ctx_, pkt);
-//        if (0 != ret) {
-//            fprintf(stderr, "[video_player] Error: avcodec_send_packet failed! ret = %d\n", ret);
-//            return nullptr;
-//        }
-//
-//        av_packet_unref(pkt);
-//
-//        ret = avcodec_receive_frame(av_codec_ctx_, frame_);
-//        if (0 != ret) {
-//            fprintf(stderr, "[video_player] Error: avcodec_receive_frame failed! ret = %d\n", ret);
-//            return nullptr;
-//        }
-//
-//        return frame_;
-//    }
 }

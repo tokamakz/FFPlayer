@@ -9,7 +9,7 @@ extern "C" {
 }
 
 namespace simple_player {
-    class FFSource : public PacketQueue {
+    class FFSource {
     public:
         FFSource();
         ~FFSource();

@@ -1,10 +1,10 @@
 #include "FFPlayer.h"
 
 #include <thread>
+#include <functional>
 
 namespace simple_player {
     FFPlayer::FFPlayer() {
-        display_ = new SDLDisplay();
         decoder_ = new FFDecoder();
         source_ = new FFSource();
     }
@@ -25,7 +25,7 @@ namespace simple_player {
             return false;
         }
 
-        display_->init();
+        pkt_queue_.start(std::bind(&FFDecoder::receive_packet, decoder_, std::placeholders::_1));
 
         return false;
     }
@@ -35,17 +35,20 @@ namespace simple_player {
     }
 
     bool FFPlayer::play() {
+        while(true) {
+            AVPacket* pkt = av_packet_alloc();
+            if (pkt == nullptr) {
+                fprintf(stderr, "[video_player] Error: raw_packet alloc fail!\n");
+                return false;
+            }
 
-        AVPacket* pkt = av_packet_alloc();
-        if (pkt == nullptr) {
-            fprintf(stderr, "[video_player] Error: raw_packet alloc fail!\n");
-            return false;
+            bool bRet = source_->read_frame(pkt);
+            if(!bRet) {
+                av_packet_free(&pkt);
+                return false;
+            }
+
+            pkt_queue_.send_packet(pkt);
         }
-
-        while(source_->read_frame(pkt)) {
-            send_packet(pkt);
-        }
-
-        return false;
     }
 }
