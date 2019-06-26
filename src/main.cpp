@@ -8,7 +8,7 @@
 #include "FFPlayer.h"
 
 static void force_exit(int arg) {
-    fprintf(stderr, "video_player stop!!!\n");
+    LOG(INFO) << "video_player stop!!!";
     exit(0);
 }
 
@@ -18,16 +18,6 @@ static void init_log() {
     google::SetStderrLogging(google::GLOG_INFO);
 //    google::SetLogFilenameExtension("log_");
     FLAGS_colorlogtostderr = true;
-}
-
-static void test_t() {
-    std::thread th([]{
-        while(true) {
-            std::this_thread::sleep_for(std::chrono::seconds(1));
-            std::cout << "hello" << std::endl;
-        }
-    });
-    th.detach();
 }
 
 int main() {
@@ -46,7 +36,6 @@ int main() {
 //        });
 //        th.detach();
 //    }
-    test_t();
 
     std::this_thread::sleep_for(std::chrono::seconds(1000));
 

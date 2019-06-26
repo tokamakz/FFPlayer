@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include "PacketQueue.h"
+#include "BufferQueue.h"
 
 extern "C" {
 #include "libavformat/avformat.h"
@@ -24,7 +24,6 @@ namespace simple_player {
         AVCodecParameters *getAVCodecParameters() const {
             return format_ctx_->streams[stream_type_]->codecpar;
         }
-
 
     private:
         AVFormatContext* format_ctx_;

@@ -3,6 +3,8 @@
 #include <thread>
 #include <functional>
 
+#include "glog/logging.h"
+
 namespace simple_player {
     FFPlayer::FFPlayer() {
         decoder_ = new FFDecoder();
@@ -15,13 +17,13 @@ namespace simple_player {
     bool FFPlayer::open(const std::string &url) {
         bool bRet = source_->open(url);
         if (!bRet) {
-            fprintf(stderr, "[video_player] source_->open alloc fail!\n");
+            LOG(ERROR) << "source_->open alloc fail!";
             return false;
         }
 
         bRet = decoder_->open(source_->getAVCodecID(), source_->getAVCodecParameters());
         if (!bRet) {
-            fprintf(stderr, "[video_player] decoder_->open alloc fail!\n");
+            LOG(ERROR) << "decoder_->open alloc fail!";
             return false;
         }
 
@@ -38,7 +40,7 @@ namespace simple_player {
         while(true) {
             AVPacket* pkt = av_packet_alloc();
             if (pkt == nullptr) {
-                fprintf(stderr, "[video_player] Error: raw_packet alloc fail!\n");
+                LOG(ERROR) << "av_packet_alloc fail!";
                 return false;
             }
 

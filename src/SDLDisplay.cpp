@@ -1,5 +1,6 @@
 #include <thread>
 
+#include "glog/logging.h"
 #include "SDLDisplay.h"
 
 namespace simple_player {
@@ -11,12 +12,12 @@ namespace simple_player {
 
     bool SDLDisplay::init() {
         if (SDL_Init(SDL_INIT_VIDEO)) {
-            fprintf(stderr, "[video_player] Error: Could not initialize. %s\n", SDL_GetError());
+            LOG(ERROR) << "SDL_Init ERROR" << SDL_GetError();
             return -1;
         }
         SDL_Window *screen = SDL_CreateWindow("video_player", 0, 0, 950, 540, SDL_WINDOW_OPENGL);
         if (!screen) {
-            fprintf(stderr, "[video_player] Error: could not create window. %s\n", SDL_GetError());
+            LOG(ERROR) << "SDL_CreateWindow ERROR" << SDL_GetError();
             return -1;
         }
 

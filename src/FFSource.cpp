@@ -50,6 +50,10 @@ namespace simple_player {
         return true;
     }
 
+    bool FFSource::close() {
+        return false;
+    }
+
      bool FFSource::read_frame(AVPacket* pkt) {
         while (av_read_frame(format_ctx_, pkt) >= 0) {
             if (pkt_->stream_index != stream_type_) {
@@ -57,10 +61,6 @@ namespace simple_player {
             }
             return true;
         }
-        return false;
-    }
-
-    bool FFSource::close() {
         return false;
     }
 }

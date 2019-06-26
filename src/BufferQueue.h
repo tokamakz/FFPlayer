@@ -13,13 +13,13 @@ extern "C" {
 
 namespace simple_player {
     template<class T>
-    class PacketQueue {
+    class BufferQueue {
     public:
-        PacketQueue() {
+        BufferQueue() {
             stop_status_ = false;
         }
 
-        ~PacketQueue(){};
+        ~BufferQueue(){};
 
         bool start(std::function<void(T)> receive_packet) {
             std::thread th([&]() {

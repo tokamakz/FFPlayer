@@ -6,7 +6,7 @@
 #include "FFSource.h"
 #include "FFDecoder.h"
 
-#include "PacketQueue.h"
+#include "BufferQueue.h"
 
 namespace simple_player {
     class FFPlayer {
@@ -18,9 +18,8 @@ namespace simple_player {
         bool close();
 
     private:
-
         FFDecoder *decoder_;
         FFSource *source_;
-        PacketQueue<AVPacket*> pkt_queue_;
+        BufferQueue<AVPacket*> pkt_queue_;
     };
 }

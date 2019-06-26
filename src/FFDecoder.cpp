@@ -5,6 +5,7 @@
 #include <iostream>
 #include <iomanip>
 
+#include "glog/logging.h"
 
 namespace simple_player {
     FFDecoder::FFDecoder() {
@@ -14,46 +15,37 @@ namespace simple_player {
     FFDecoder::~FFDecoder() {
     }
 
-    bool FFDecoder::init() {
-        return false;
-    }
-
     bool FFDecoder::open(enum AVCodecID codec_id, const AVCodecParameters *par) {
         display_->init();
         codec_id_ = codec_id;
         AVCodec* codec = avcodec_find_decoder(codec_id_);
         if (codec == nullptr) {
-            fprintf(stderr, "[video_player] Error: Unsupported codec. ERROR! \n");
+            LOG(ERROR) << "Unsupported codec";
             return false;
         }
 
         av_codec_ctx_ = avcodec_alloc_context3(codec);
         if (av_codec_ctx_ == nullptr) {
-            fprintf(stderr, "[video_player] Error: Unsupported codec. ERROR! \n");
+            LOG(ERROR) << "avcodec_alloc_context3 ERROR";
             return false;
         }
 
         int err_code = avcodec_parameters_to_context(av_codec_ctx_, par);
         if (err_code != 0) {
-            fprintf(stderr, "[video_player] Error: avcodec_parameters_to_context\n");
+            LOG(ERROR) << "avcodec_parameters_to_context ERROR";
             return false;
         }
 
         err_code = avcodec_open2(av_codec_ctx_, codec, nullptr);
         if (err_code != 0) {
-            fprintf(stderr, "[video_player] Error: can not open the codec! ERROR! \n");
+            LOG(ERROR) << "avcodec_open2 ERROR";
             return false;
         }
 
         return true;
     }
 
-    void FFDecoder::de_init() {
-    }
-
-
     void FFDecoder::start() {
-
     }
 
     void FFDecoder::receive_packet(AVPacket *pkt) {
@@ -63,7 +55,7 @@ namespace simple_player {
 
         int ret = avcodec_send_packet(av_codec_ctx_, pkt);
         if (0 != ret) {
-            fprintf(stderr, "[video_player] Error: avcodec_send_packet failed! ret = %d\n", ret);
+            LOG(ERROR) << "avcodec_send_packet failed! ret = " << ret;
             return ;
         }
 
@@ -71,13 +63,13 @@ namespace simple_player {
 
         AVFrame *frame = av_frame_alloc();
         if (frame == nullptr) {
-            fprintf(stderr, "[video_player] Error: pFrame alloc fail! ERROR!\n");
+            LOG(ERROR) << "av_frame_alloc failed!";
             return ;
         }
 
         ret = avcodec_receive_frame(av_codec_ctx_, frame);
         if (0 != ret) {
-            fprintf(stderr, "[video_player] Error: avcodec_receive_frame failed! ret = %d\n", ret);
+            LOG(ERROR) << "avcodec_receive_frame failed!";
             return ;
         }
 
