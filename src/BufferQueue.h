@@ -21,28 +21,14 @@ namespace simple_player {
 
         ~BufferQueue(){};
 
-        bool start(std::function<void(T)> receive_packet) {
-            std::thread th([&]() {
-                while(true) {
-                    if(pkt_read_queue_.empty()) {
-                        std::lock_guard<std::mutex> lock(queue_mutex_);
-                        if (pkt_write_queue_.empty()) {
-                            continue;
-                        }
-                        pkt_read_queue_.swap(pkt_write_queue_);
-                    }
-                    auto pkt = pkt_read_queue_.front();
-                    pkt_read_queue_.pop();
-                    receive_packet(pkt);
-                    if(stop_status_) {
-                        std::lock_guard<std::mutex> locker(stop_mutex_);
-                        stop_cond_.notify_one();
-                        break;
-                    }
-                }
-            });
-            th.detach();
-            return true;
+        void push(const T& value) {
+            std::lock_guard<std::mutex> lock(queue_mutex_);
+            buffer_queue_.push(value);
+        }
+
+        void front() {
+            std::lock_guard<std::mutex> lock(queue_mutex_);
+            buffer_queue_.front();
         }
 
         bool stop() {
@@ -61,7 +47,7 @@ namespace simple_player {
         }
 
     private:
-        std::queue<T> pkt_read_queue_;
+        std::queue<T> buffer_queue_;
         std::queue<T> pkt_write_queue_;
         std::mutex queue_mutex_;
 
