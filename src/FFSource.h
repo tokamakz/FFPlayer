@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include "BufferQueue.h"
+#include "FrameQueue.h"
 
 extern "C" {
 #include "libavformat/avformat.h"
@@ -30,6 +30,5 @@ namespace simple_player {
         AVPacket* pkt_;
         int stream_type_;
     };
-
 }
 

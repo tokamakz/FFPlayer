@@ -1,12 +1,11 @@
 #pragma once
 
 #include <string>
-#include <list>
 
+#include "AVPacketQueue.h"
+#include "FrameQueue.h"
 #include "FFSource.h"
 #include "FFDecoder.h"
-
-#include "BufferQueue.h"
 
 namespace simple_player {
     class FFPlayer {
@@ -18,8 +17,14 @@ namespace simple_player {
         bool close();
 
     private:
-        FFDecoder *decoder_;
+        int play_status_;
+        void receive_stream_thread();
+        void video_decode_thread();
+        void image_render_thread();
         FFSource *source_;
-        BufferQueue<AVPacket*> pkt_queue_;
+        FFDecoder *decoder_;
+        SDLRender *render_;
+        FrameQueue frame_queue_;
+        AVPacketQueue pkt_queue_;
     };
 }

@@ -41,12 +41,6 @@ namespace simple_player {
 
         stream_type_ = stream_type;
 
-        pkt_ = av_packet_alloc();
-        if (pkt_ == nullptr) {
-            fprintf(stderr, "[video_player] Error: raw_packet alloc fail!\n");
-            return false;
-        }
-
         return true;
     }
 
@@ -56,7 +50,7 @@ namespace simple_player {
 
      bool FFSource::read_frame(AVPacket* pkt) {
         while (av_read_frame(format_ctx_, pkt) >= 0) {
-            if (pkt_->stream_index != stream_type_) {
+            if (pkt->stream_index != stream_type_) {
                 continue;
             }
             return true;

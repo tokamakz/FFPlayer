@@ -1,56 +1,37 @@
 #include <thread>
 
 #include "glog/logging.h"
-#include "SDLDisplay.h"
+#include "SDLRender.h"
 
 namespace simple_player {
-    SDLDisplay::SDLDisplay() {
+    SDLRender::SDLRender() {
     }
 
-    SDLDisplay::~SDLDisplay() {
+    SDLRender::~SDLRender() {
     }
 
-    bool SDLDisplay::init() {
+    bool SDLRender::init() {
         if (SDL_Init(SDL_INIT_VIDEO)) {
             LOG(ERROR) << "SDL_Init ERROR" << SDL_GetError();
-            return -1;
+            return false;
         }
         SDL_Window *screen = SDL_CreateWindow("video_player", 0, 0, 950, 540, SDL_WINDOW_OPENGL);
         if (!screen) {
             LOG(ERROR) << "SDL_CreateWindow ERROR" << SDL_GetError();
-            return -1;
+            return false;
         }
 
         sdl_renderer_ = SDL_CreateRenderer(screen, -1, 0);
         sdl_texture_ = SDL_CreateTexture(sdl_renderer_, SDL_PIXELFORMAT_IYUV,
                 SDL_TEXTUREACCESS_STREAMING, 1920, 1080);
 
-        return false;
+        return true;
     }
 
-    void SDLDisplay::de_init() {
+    void SDLRender::de_init() {
     }
 
-    void SDLDisplay::start() {
-
-        std::thread th([&]() {
-            AVFrame* frame = nullptr;
-            {
-                std::lock_guard<std::mutex> lock(list_mutex_);
-                if (!frame_list_.empty()) {
-                    frame = frame_list_.front();
-                    frame_list_.pop_front();
-                }
-            }
-
-            if (frame != nullptr) {
-                display(frame);
-            }
-        });
-        th.detach();
-    }
-
-    void SDLDisplay::display(AVFrame* frame) {
+    void SDLRender::render(AVFrame* frame) {
         SDL_UpdateYUVTexture(sdl_texture_, nullptr,
                              frame->data[0], frame->linesize[0],
                              frame->data[1], frame->linesize[1],
@@ -58,10 +39,5 @@ namespace simple_player {
         SDL_RenderClear(sdl_renderer_);
         SDL_RenderCopy(sdl_renderer_, sdl_texture_, nullptr, nullptr);
         SDL_RenderPresent(sdl_renderer_);
-    }
-
-    void SDLDisplay::onData(AVFrame* frame) {
-        std::lock_guard<std::mutex> lock(list_mutex_);
-        frame_list_.push_back(frame);
     }
 }

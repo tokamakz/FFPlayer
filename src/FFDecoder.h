@@ -8,8 +8,8 @@ extern "C"{
 #include "libavutil/avutil.h"
 }
 
-#include "BufferQueue.h"
-#include "SDLDisplay.h"
+#include "FrameQueue.h"
+#include "SDLRender.h"
 
 namespace simple_player {
     class FFDecoder {
@@ -17,15 +17,10 @@ namespace simple_player {
         FFDecoder();
         ~FFDecoder();
         bool open(enum AVCodecID codec_id, const AVCodecParameters *par);
-        void start();
-        void receive_packet(AVPacket *pkt);
+        bool decode(AVPacket *pkt, AVFrame* frame);
 
     private:
-        SDLDisplay *display_;
-        enum AVCodecID codec_id_;
-        AVFrame *frame_;
         AVCodecContext* av_codec_ctx_;
-        BufferQueue<AVFrame *> frame_queue_;
     };
 }
 

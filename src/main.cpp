@@ -1,4 +1,4 @@
-#include <signal.h>
+#include <csignal>
 
 #include <iostream>
 
@@ -14,30 +14,25 @@ static void force_exit(int arg) {
 
 static void init_log() {
     google::InitGoogleLogging("FFPlayer");
-//    google::SetLogDestination(google::GLOG_INFO, "/home/user1/projects/log/video_player/INFO_");
-    google::SetStderrLogging(google::GLOG_INFO);
-//    google::SetLogFilenameExtension("log_");
+    google::SetLogDestination(google::GLOG_ERROR, "/home/user1/projects/log/video_player/ERROR_");
+    google::SetStderrLogging(google::GLOG_ERROR);
+    google::SetLogFilenameExtension("log_");
     FLAGS_colorlogtostderr = true;
 }
 
 int main() {
     ::signal(SIGINT, force_exit);
 
-//    using namespace simple_player;
-//    auto player = new FFPlayer();
-//    player->open("rtsp://admin:seemmo123@10.10.19.130");
+    using namespace simple_player;
+    auto player = new FFPlayer();
+    bool bRet = player->open("rtsp://admin:hfrz01245@10.100.8.105");
+    if(!bRet) {
+        LOG(ERROR) << "player->open fail!";
+        return 0;
+    }
 
-//    {
-//        std::thread th([]{
-//            while(true) {
-//                std::this_thread::sleep_for(std::chrono::seconds(1));
-//                std::cout << "hello" << std::endl;
-//            }
-//        });
-//        th.detach();
-//    }
+    player->play();
 
-    std::this_thread::sleep_for(std::chrono::seconds(1000));
-
+    std::this_thread::sleep_for(std::chrono::seconds(10000));
     return 0;
 }

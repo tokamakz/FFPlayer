@@ -9,16 +9,13 @@
 
 namespace simple_player {
     FFDecoder::FFDecoder() {
-        display_ = new SDLDisplay();
     }
 
     FFDecoder::~FFDecoder() {
     }
 
     bool FFDecoder::open(enum AVCodecID codec_id, const AVCodecParameters *par) {
-        display_->init();
-        codec_id_ = codec_id;
-        AVCodec* codec = avcodec_find_decoder(codec_id_);
+        AVCodec* codec = avcodec_find_decoder(codec_id);
         if (codec == nullptr) {
             LOG(ERROR) << "Unsupported codec";
             return false;
@@ -45,34 +42,23 @@ namespace simple_player {
         return true;
     }
 
-    void FFDecoder::start() {
-    }
-
-    void FFDecoder::receive_packet(AVPacket *pkt) {
-        if(pkt == nullptr) {
-            return ;
+    bool FFDecoder::decode(AVPacket *pkt, AVFrame* frame) {
+        if(pkt == nullptr || frame == nullptr) {
+            return false;
         }
 
         int ret = avcodec_send_packet(av_codec_ctx_, pkt);
         if (0 != ret) {
             LOG(ERROR) << "avcodec_send_packet failed! ret = " << ret;
-            return ;
-        }
-
-        av_packet_free(&pkt);
-
-        AVFrame *frame = av_frame_alloc();
-        if (frame == nullptr) {
-            LOG(ERROR) << "av_frame_alloc failed!";
-            return ;
+            return false;
         }
 
         ret = avcodec_receive_frame(av_codec_ctx_, frame);
         if (0 != ret) {
             LOG(ERROR) << "avcodec_receive_frame failed!";
-            return ;
+            return false;
         }
 
-        frame_queue_.send_packet(frame);
+        return true;
     }
 }

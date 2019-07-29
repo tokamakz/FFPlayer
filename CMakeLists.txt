@@ -27,7 +27,7 @@ include_directories(${PROJECT_SOURCE_DIR}/src)
 set(SRC_FFPLAYER src/FFPlayer.cpp src/FFPlayer.h
         src/FFSource.cpp src/FFSource.h
         src/FFDecoder.cpp src/FFDecoder.h
-        src/SDLDisplay.cpp src/SDLDisplay.h src/BufferQueue.h)
+        src/SDLRender.cpp src/SDLRender.h src/FrameQueue.h src/FrameQueue.cpp src/AVPacketQueue.cpp src/AVPacketQueue.h)
 
 add_executable(FFPlayer src/main.cpp
         ${SRC_FFPLAYER})
