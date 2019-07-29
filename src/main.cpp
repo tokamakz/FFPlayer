@@ -1,14 +1,12 @@
 #include <csignal>
 
-#include <iostream>
-
 #include <thread>
 
 #include "glog/logging.h"
 #include "FFPlayer.h"
 
 static void force_exit(int arg) {
-    LOG(INFO) << "video_player stop!!!";
+    LOG(INFO) << "FFPlayer stop!!!";
     exit(0);
 }
 
@@ -30,8 +28,6 @@ int main() {
         LOG(ERROR) << "player->open fail!";
         return 0;
     }
-
-    player->play();
 
     std::this_thread::sleep_for(std::chrono::seconds(10000));
     return 0;

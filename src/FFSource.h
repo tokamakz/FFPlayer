@@ -1,11 +1,9 @@
 #pragma once
 
 #include <string>
-#include "FrameQueue.h"
 
 extern "C" {
 #include "libavformat/avformat.h"
-#include "libavcodec/avcodec.h"
 }
 
 namespace simple_player {
@@ -27,7 +25,6 @@ namespace simple_player {
 
     private:
         AVFormatContext* format_ctx_;
-        AVPacket* pkt_;
         int stream_type_;
     };
 }

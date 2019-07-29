@@ -1,7 +1,6 @@
-#include <thread>
+#include "SDLRender.h"
 
 #include "glog/logging.h"
-#include "SDLRender.h"
 
 namespace simple_player {
     SDLRender::SDLRender() {
@@ -10,12 +9,12 @@ namespace simple_player {
     SDLRender::~SDLRender() {
     }
 
-    bool SDLRender::init() {
+    bool SDLRender::open() {
         if (SDL_Init(SDL_INIT_VIDEO)) {
             LOG(ERROR) << "SDL_Init ERROR" << SDL_GetError();
             return false;
         }
-        SDL_Window *screen = SDL_CreateWindow("video_player", 0, 0, 950, 540, SDL_WINDOW_OPENGL);
+        SDL_Window *screen = SDL_CreateWindow("FFPlayer", 0, 0, 192, 108, SDL_WINDOW_OPENGL);
         if (!screen) {
             LOG(ERROR) << "SDL_CreateWindow ERROR" << SDL_GetError();
             return false;
@@ -28,7 +27,10 @@ namespace simple_player {
         return true;
     }
 
-    void SDLRender::de_init() {
+    void SDLRender::close() {
+        SDL_DestroyTexture(sdl_texture_);
+        SDL_DestroyRenderer(sdl_renderer_);
+        SDL_DestroyWindow(sdl_window_);
     }
 
     void SDLRender::render(AVFrame* frame) {

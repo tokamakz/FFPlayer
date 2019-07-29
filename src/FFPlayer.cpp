@@ -1,23 +1,36 @@
 #include "FFPlayer.h"
 
 #include <thread>
-#include <functional>
 
 #include "glog/logging.h"
 
 namespace simple_player {
     FFPlayer::FFPlayer() {
-        play_status_ = 1;
+        play_status_ = 0;
         render_ = new SDLRender();
         decoder_ = new FFDecoder();
         source_ = new FFSource();
     }
 
     FFPlayer::~FFPlayer() {
+        if(render_ != nullptr) {
+            delete render_;
+            render_ = nullptr;
+        }
+
+        if(decoder_ != nullptr) {
+            delete decoder_;
+            decoder_ = nullptr;
+        }
+
+        if(source_ != nullptr) {
+            delete source_;
+            source_ = nullptr;
+        }
     }
 
     bool FFPlayer::open(const std::string &url) {
-        bool bRet = render_->init();
+        bool bRet = render_->open();
         if(!bRet) {
             LOG(ERROR) << "render_->init fail!";
             return false;
@@ -38,20 +51,22 @@ namespace simple_player {
         frame_queue_.init(1000);
         pkt_queue_.init(1000);
 
-        return true;
-    }
-
-    bool FFPlayer::close() {
-        return false;
-    }
-
-    bool FFPlayer::play() {
+        play_status_ = 1;
         std::thread th_render(&FFPlayer::image_render_thread, this);
         th_render.detach();
         std::thread th_decode(&FFPlayer::video_decode_thread, this);
         th_decode.detach();
         std::thread th_receive(&FFPlayer::receive_stream_thread, this);
         th_receive.detach();
+
+        return true;
+    }
+
+    bool FFPlayer::close() {
+        source_->close();
+        decoder_->close();
+        render_->close();
+        return false;
     }
 
     void FFPlayer::receive_stream_thread() {

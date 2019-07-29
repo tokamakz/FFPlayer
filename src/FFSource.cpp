@@ -45,6 +45,7 @@ namespace simple_player {
     }
 
     bool FFSource::close() {
+        avformat_close_input(&format_ctx_);
         return false;
     }
 

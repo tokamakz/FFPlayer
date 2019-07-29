@@ -1,10 +1,5 @@
 #include "FFDecoder.h"
 
-#include <cstring>
-#include <thread>
-#include <iostream>
-#include <iomanip>
-
 #include "glog/logging.h"
 
 namespace simple_player {
@@ -60,5 +55,9 @@ namespace simple_player {
         }
 
         return true;
+    }
+
+    void FFDecoder::close() {
+        avcodec_close(av_codec_ctx_);
     }
 }

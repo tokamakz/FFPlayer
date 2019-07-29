@@ -8,11 +8,12 @@ namespace simple_player {
     public:
         SDLRender();
         ~SDLRender();
-        bool init();
-        void de_init();
+        bool open();
+        void close();
         void render(AVFrame* frame);
 
     private:
+        SDL_Window *sdl_window_;
         SDL_Renderer *sdl_renderer_;
         SDL_Texture *sdl_texture_;
     };

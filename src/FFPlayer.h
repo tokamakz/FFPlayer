@@ -6,6 +6,7 @@
 #include "FrameQueue.h"
 #include "FFSource.h"
 #include "FFDecoder.h"
+#include "SDLRender.h"
 
 namespace simple_player {
     class FFPlayer {
@@ -13,14 +14,13 @@ namespace simple_player {
         FFPlayer();
         ~FFPlayer();
         bool open(const std::string &url);
-        bool play();
         bool close();
 
     private:
-        int play_status_;
         void receive_stream_thread();
         void video_decode_thread();
         void image_render_thread();
+        int play_status_;
         FFSource *source_;
         FFDecoder *decoder_;
         SDLRender *render_;

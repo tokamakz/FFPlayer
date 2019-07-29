@@ -1,15 +1,8 @@
 #pragma once
 
-#include <string>
-
 extern "C"{
-#include "libavutil/intreadwrite.h"
 #include "libavcodec/avcodec.h"
-#include "libavutil/avutil.h"
 }
-
-#include "FrameQueue.h"
-#include "SDLRender.h"
 
 namespace simple_player {
     class FFDecoder {
@@ -17,6 +10,7 @@ namespace simple_player {
         FFDecoder();
         ~FFDecoder();
         bool open(enum AVCodecID codec_id, const AVCodecParameters *par);
+        void close();
         bool decode(AVPacket *pkt, AVFrame* frame);
 
     private:
