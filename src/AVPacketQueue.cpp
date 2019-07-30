@@ -1,6 +1,12 @@
 #include "AVPacketQueue.h"
 
 namespace simple_player {
+    AVPacketQueue::AVPacketQueue() {
+        max_queue_size_ = 0;
+    }
+
+    AVPacketQueue::~AVPacketQueue() = default;
+
     bool AVPacketQueue::init(int max_queue_size) {
         max_queue_size_ = max_queue_size;
         return true;

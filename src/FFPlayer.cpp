@@ -63,10 +63,13 @@ namespace simple_player {
     }
 
     bool FFPlayer::close() {
+        play_status_ = 0;
         source_->close();
         decoder_->close();
         render_->close();
-        return false;
+        frame_queue_.de_init();
+        pkt_queue_.de_init();
+        return true;
     }
 
     void FFPlayer::receive_stream_thread() {
@@ -92,7 +95,12 @@ namespace simple_player {
         while(play_status_ == 1) {
             AVPacket* pkt = pkt_queue_.pop();
             AVFrame* frame = frame_queue_.get();
-            decoder_->decode(pkt, frame);
+            bool bRet = decoder_->decode(pkt, frame);
+            if(!bRet) {
+                LOG(ERROR) << "decoder_->decode fail!";
+                ::av_packet_unref(pkt);
+                break;
+            }
             ::av_packet_unref(pkt);
             frame_queue_.push(frame);
         }

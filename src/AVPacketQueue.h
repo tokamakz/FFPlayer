@@ -11,8 +11,8 @@ extern "C" {
 namespace simple_player {
     class AVPacketQueue {
     public:
-        AVPacketQueue() {}
-        ~AVPacketQueue(){};
+        AVPacketQueue();
+        ~AVPacketQueue();
         bool init(int max_queue_size);
         void de_init();
         void push(AVPacket *pkt);

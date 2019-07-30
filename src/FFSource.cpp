@@ -2,10 +2,11 @@
 
 namespace simple_player {
     FFSource::FFSource() {
+        format_ctx_ = nullptr;
+        stream_type_ = -1;
     }
 
-    FFSource::~FFSource() {
-    }
+    FFSource::~FFSource() = default;
 
     bool FFSource::open(const std::string &url) {
         AVDictionary* options = nullptr;
@@ -46,7 +47,7 @@ namespace simple_player {
 
     bool FFSource::close() {
         avformat_close_input(&format_ctx_);
-        return false;
+        return true;
     }
 
      bool FFSource::read_frame(AVPacket* pkt) {

@@ -4,10 +4,10 @@
 
 namespace simple_player {
     FFDecoder::FFDecoder() {
+        av_codec_ctx_ = nullptr;
     }
 
-    FFDecoder::~FFDecoder() {
-    }
+    FFDecoder::~FFDecoder() = default;
 
     bool FFDecoder::open(enum AVCodecID codec_id, const AVCodecParameters *par) {
         AVCodec* codec = avcodec_find_decoder(codec_id);

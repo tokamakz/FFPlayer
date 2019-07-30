@@ -10,13 +10,16 @@ namespace simple_player {
     }
 
     void FrameQueue::de_init() {
+        while(!stack_.empty()) {
+            AVFrame* frame = stack_.top();
+            ::av_frame_free(&frame);
+            stack_.pop();
+        }
     }
 
-    AVFrame *FrameQueue::get() {
-        std::lock_guard<std::mutex> lock(stack_mutex_);
-        if (stack_.empty()) {
-            stack_not_empty_.wait(queue_mutex_);
-        }
+    AVFrame* FrameQueue::get() {
+        std::unique_lock<std::mutex> lock(stack_mutex_);
+        stack_not_empty_.wait(queue_mutex_, [this]{return !stack_.empty();});
         AVFrame* frame = stack_.top();
         stack_.pop();
         return frame;
@@ -25,6 +28,7 @@ namespace simple_player {
     void FrameQueue::put(AVFrame *frame) {
         std::lock_guard<std::mutex> lock(stack_mutex_);
         stack_.push(frame);
+        stack_not_empty_.notify_one();
     }
 
     void FrameQueue::push(AVFrame *frame) {
@@ -33,11 +37,9 @@ namespace simple_player {
         queue_not_empty_.notify_one();
     }
 
-    AVFrame * FrameQueue::pop() {
-        std::lock_guard<std::mutex> lock(queue_mutex_);
-        while(queue_.empty()) {
-            queue_not_empty_.wait(queue_mutex_);
-        }
+    AVFrame* FrameQueue::pop() {
+        std::unique_lock<std::mutex> lock(queue_mutex_);
+        queue_not_empty_.wait(queue_mutex_, [this]{return !queue_.empty();});
         AVFrame *frame = queue_.front();
         queue_.pop();
         return frame;

@@ -4,10 +4,12 @@
 
 namespace simple_player {
     SDLRender::SDLRender() {
+        sdl_window_ = nullptr;
+        sdl_renderer_ = nullptr;
+        sdl_texture_ = nullptr;
     }
 
-    SDLRender::~SDLRender() {
-    }
+    SDLRender::~SDLRender() = default;
 
     bool SDLRender::open() {
         if (SDL_Init(SDL_INIT_VIDEO)) {

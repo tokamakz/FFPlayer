@@ -12,8 +12,9 @@ extern "C" {
 namespace simple_player {
     class FrameQueue {
     public:
-        FrameQueue() {}
-        ~FrameQueue(){};
+        FrameQueue() = default;
+        ~FrameQueue() = default;
+
         bool init(unsigned int pool_size);
         void de_init();
 
