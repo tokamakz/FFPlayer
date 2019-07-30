@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stack>
 #include <queue>
 #include <mutex>
 #include <condition_variable>
@@ -13,16 +14,22 @@ namespace simple_player {
     public:
         FrameQueue() {}
         ~FrameQueue(){};
-        bool init(int max_queue_size);
+        bool init(unsigned int pool_size);
         void de_init();
+
+        AVFrame *get();
+        void put(AVFrame *frame);
+
         void push(AVFrame *frame);
         AVFrame * pop();
 
     private:
-        int max_queue_size_;
-        std::queue<AVFrame *> queue_;
-        std::condition_variable_any not_empty_;
-        std::condition_variable_any not_full_;
+        std::mutex stack_mutex_;
+        std::stack<AVFrame*> stack_;
+        std::condition_variable_any stack_not_empty_;
+
         std::mutex queue_mutex_;
+        std::queue<AVFrame *> queue_;
+        std::condition_variable_any queue_not_empty_;
     };
 }

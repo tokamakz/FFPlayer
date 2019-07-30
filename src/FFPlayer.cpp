@@ -91,11 +91,7 @@ namespace simple_player {
     void FFPlayer::video_decode_thread() {
         while(play_status_ == 1) {
             AVPacket* pkt = pkt_queue_.pop();
-            AVFrame* frame = ::av_frame_alloc();
-            if (frame == nullptr) {
-                LOG(ERROR) << "av_frame_alloc fail!";
-                break;
-            }
+            AVFrame* frame = frame_queue_.get();
             decoder_->decode(pkt, frame);
             ::av_packet_unref(pkt);
             frame_queue_.push(frame);
@@ -106,7 +102,7 @@ namespace simple_player {
         while(play_status_ == 1) {
             AVFrame* frame = frame_queue_.pop();
             render_->render(frame);
-            ::av_frame_free(&frame);
+            frame_queue_.put(frame);
         }
     }
 }

@@ -14,7 +14,7 @@ namespace simple_player {
             LOG(ERROR) << "SDL_Init ERROR" << SDL_GetError();
             return false;
         }
-        SDL_Window *screen = SDL_CreateWindow("FFPlayer", 0, 0, 192, 108, SDL_WINDOW_OPENGL);
+        SDL_Window *screen = SDL_CreateWindow("FFPlayer", 0, 0, 960, 540, SDL_WINDOW_OPENGL);
         if (!screen) {
             LOG(ERROR) << "SDL_CreateWindow ERROR" << SDL_GetError();
             return false;
