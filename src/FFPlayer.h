@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <atomic>
 
 #include "AVPacketQueue.h"
 #include "FrameQueue.h"
@@ -20,11 +21,16 @@ namespace simple_player {
         void receive_stream_thread();
         void video_decode_thread();
         void image_render_thread();
-        int play_status_;
+        std::atomic<int> play_status_;
+
         FFSource *source_;
         FFDecoder *decoder_;
         SDLRender *render_;
         FrameQueue frame_queue_;
         AVPacketQueue pkt_queue_;
+
+        std::mutex close_mutex_;
+        int close_thread_count_;
+        std::condition_variable_any close_cond_;
     };
 }

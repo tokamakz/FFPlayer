@@ -13,7 +13,11 @@ namespace simple_player {
     }
 
     void AVPacketQueue::de_init() {
-        return ;
+        while(!queue_.empty()) {
+            AVPacket *pkt = queue_.front();
+            ::av_packet_unref(pkt);
+            queue_.pop();
+        }
     }
 
     void AVPacketQueue::push(AVPacket *pkt) {

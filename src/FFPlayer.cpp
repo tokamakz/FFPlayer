@@ -7,6 +7,7 @@
 namespace simple_player {
     FFPlayer::FFPlayer() {
         play_status_ = 0;
+        close_thread_count_ = 0;
         render_ = new SDLRender();
         decoder_ = new FFDecoder();
         source_ = new FFSource();
@@ -58,12 +59,17 @@ namespace simple_player {
         th_decode.detach();
         std::thread th_receive(&FFPlayer::receive_stream_thread, this);
         th_receive.detach();
+        close_thread_count_ = 3;
 
         return true;
     }
 
     bool FFPlayer::close() {
         play_status_ = 0;
+        {
+            std::unique_lock<std::mutex> lock(close_mutex_);
+            close_cond_.wait(close_mutex_, [this]{return (close_thread_count_ == 0);});
+        }
         source_->close();
         decoder_->close();
         render_->close();
@@ -89,6 +95,10 @@ namespace simple_player {
 
             pkt_queue_.push(pkt);
         }
+
+        std::lock_guard<std::mutex> lock(close_mutex_);
+        close_thread_count_--;
+        close_cond_.notify_one();
     }
 
     void FFPlayer::video_decode_thread() {
@@ -104,6 +114,10 @@ namespace simple_player {
             ::av_packet_unref(pkt);
             frame_queue_.push(frame);
         }
+
+        std::lock_guard<std::mutex> lock(close_mutex_);
+        close_thread_count_--;
+        close_cond_.notify_one();
     }
 
     void FFPlayer::image_render_thread() {
@@ -112,5 +126,9 @@ namespace simple_player {
             render_->render(frame);
             frame_queue_.put(frame);
         }
+
+        std::lock_guard<std::mutex> lock(close_mutex_);
+        close_thread_count_--;
+        close_cond_.notify_one();
     }
 }

@@ -20,15 +20,14 @@ static void init_log() {
 
 int main() {
     ::signal(SIGINT, force_exit);
-
     using namespace simple_player;
     auto player = new FFPlayer();
-    bool bRet = player->open("rtsp://admin:hfrz01245@10.100.8.105");
+    bool bRet = player->open("rtsp://192.168.3.43:8554/test.264");
     if(!bRet) {
         LOG(ERROR) << "player->open fail!";
         return 0;
     }
 
-    std::this_thread::sleep_for(std::chrono::seconds(10000));
+    std::this_thread::sleep_for(std::chrono::seconds(1000));
     return 0;
 }
