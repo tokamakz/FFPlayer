@@ -1,10 +1,3 @@
-# FFPlayer
-
-
-./configure --prefix=/home/work1/ffmpeg --disable-small --disable-autodetect --disable-programs --disable-doc --disable-avdevice --disable-swresample --disable-swscale --disable-avfilter  --disable-encoders --disable-decoders --enable-decoder=h264,hevc --disable-debug
-
-
-
 Introduction
 ============
 
@@ -12,22 +5,48 @@ FFPlayer is a audio and video player,use a variety of ways to receive media sour
 
 
 
+Build
+============
+
+yasm-1.3.0
+
+from: http://yasm.tortall.net/
+
+./configure --prefix=~/yasm
+
+make && make install
+
+add yasm/bin to your PATH
+
+
+
+ffmpeg 4.2
+
+from:https://github.com/FFmpeg/FFmpeg
+
+./configure --prefix=~/ffmpeg --disable-small  --disable-autodetect --disable-debug
+
+make && make install
+
+
+
+SDL2-2.0.10
+
+from:http://www.libsdl.org/
+
+./configure --prefix=~/sdl
+
+make && make install
+
+
 Features
 ============
 
-Media Protocol: 
+1.0.0
 
-Type:RTSP,RTMP,HLS,Media File
-
-Function:Automatic reconnection
-
-Decoder: CPU,Intel-GPU,NVIDIA-GPU,HI3559A-SDK,Raspberrypi-SDK
-
-Display: SDL,OpenGL
-
-
-
-![1564466301520](C:\Users\zhouw\AppData\Roaming\Typora\typora-user-images\1564466301520.png)
+- using FFmpeg avformat to recevie and parse video stream data.
+- using FFmpeg avcodec to decode video stream data as YUV Data.
+- using SDL to render and display YUV data. 
 
 
 
