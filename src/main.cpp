@@ -22,7 +22,7 @@ int main() {
     ::signal(SIGINT, force_exit);
     using namespace simple_player;
     auto player = new FFPlayer();
-    bool bRet = player->open("rtsp://192.168.3.43:8554/test.264");
+    bool bRet = player->open("rtsp://admin:seemmo123@10.10.19.130");
     if(!bRet) {
         LOG(ERROR) << "player->open fail!";
         return 0;

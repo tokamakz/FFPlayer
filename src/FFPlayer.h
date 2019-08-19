@@ -4,7 +4,7 @@
 #include <atomic>
 
 #include "AVPacketQueue.h"
-#include "FrameQueue.h"
+#include "AVFrameQueue.h"
 #include "FFSource.h"
 #include "FFDecoder.h"
 #include "SDLRender.h"
@@ -26,7 +26,7 @@ namespace simple_player {
         FFSource *source_;
         FFDecoder *decoder_;
         SDLRender *render_;
-        FrameQueue frame_queue_;
+        AVFrameQueue frame_queue_;
         AVPacketQueue pkt_queue_;
 
         std::mutex close_mutex_;
