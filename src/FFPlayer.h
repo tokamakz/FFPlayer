@@ -22,6 +22,7 @@ namespace simple_player {
         void video_decode_thread();
         void image_render_thread();
         std::atomic<int> play_status_;
+        unsigned int render_interval;
 
         FFSource *source_;
         FFDecoder *decoder_;

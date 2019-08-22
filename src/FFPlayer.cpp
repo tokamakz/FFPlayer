@@ -3,10 +3,14 @@
 #include <thread>
 
 #include "glog/logging.h"
+extern "C" {
+#include "libavutil/time.h"
+}
 
 namespace simple_player {
     FFPlayer::FFPlayer() {
         play_status_ = 0;
+        render_interval = 0;
         close_thread_count_ = 0;
         render_ = new SDLRender();
         decoder_ = new FFDecoder();
@@ -42,6 +46,8 @@ namespace simple_player {
             LOG(ERROR) << "source_->open fail!";
             return false;
         }
+
+        render_interval = 1000000 / source_->getFrameRate();
 
         bRet = decoder_->open(source_->getAVCodecID(), source_->getAVCodecParameters());
         if (!bRet) {
@@ -109,7 +115,7 @@ namespace simple_player {
             if(!bRet) {
                 LOG(ERROR) << "decoder_->decode fail!";
                 ::av_packet_unref(pkt);
-                break;
+                continue;
             }
             ::av_packet_unref(pkt);
             frame_queue_.push(frame);
@@ -125,6 +131,7 @@ namespace simple_player {
             AVFrame* frame = frame_queue_.pop();
             render_->render(frame);
             frame_queue_.put(frame);
+            //::av_usleep(render_interval);
         }
 
         std::lock_guard<std::mutex> lock(close_mutex_);

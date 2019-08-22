@@ -4,6 +4,15 @@ Introduction
 FFPlayer is a audio and video player,use a variety of ways to receive media source data,decode and display.
 
 
+Features
+============
+
+1.0.0
+
+- using FFmpeg avformat to recevie and parse video stream data.
+- using FFmpeg avcodec to decode video stream data as YUV Data.
+- using SDL to render and display YUV data. 
+
 
 Build
 ============
@@ -37,16 +46,3 @@ from:http://www.libsdl.org/
 ./configure --prefix=~/sdl
 
 make && make install
-
-
-Features
-============
-
-1.0.0
-
-- using FFmpeg avformat to recevie and parse video stream data.
-- using FFmpeg avcodec to decode video stream data as YUV Data.
-- using SDL to render and display YUV data. 
-
-
-

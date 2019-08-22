@@ -22,7 +22,7 @@ int main() {
     ::signal(SIGINT, force_exit);
     using namespace simple_player;
     auto player = new FFPlayer();
-    bool bRet = player->open("rtsp://admin:seemmo123@10.10.19.130");
+    bool bRet = player->open("/home/user1/test.mp4");
     if(!bRet) {
         LOG(ERROR) << "player->open fail!";
         return 0;
