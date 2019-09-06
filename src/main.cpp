@@ -10,14 +10,6 @@ static void force_exit(int arg) {
     exit(0);
 }
 
-static void init_log() {
-    google::InitGoogleLogging("FFPlayer");
-    google::SetLogDestination(google::GLOG_ERROR, "/home/user1/projects/log/video_player/ERROR_");
-    google::SetStderrLogging(google::GLOG_ERROR);
-    google::SetLogFilenameExtension("log_");
-    FLAGS_colorlogtostderr = true;
-}
-
 int main() {
     ::signal(SIGINT, force_exit);
     using namespace simple_player;

@@ -16,7 +16,7 @@ namespace simple_player {
         bool init(int max_queue_size);
         void de_init();
         void push(AVPacket *pkt);
-        AVPacket * pop();
+        AVPacket* pop();
 
     private:
         int max_queue_size_;

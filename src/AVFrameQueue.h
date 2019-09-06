@@ -14,21 +14,16 @@ namespace simple_player {
     public:
         AVFrameQueue() = default;
         ~AVFrameQueue() = default;
-
-        bool init(unsigned int pool_size);
+        bool init(unsigned int max_queue_size);
         void de_init();
-
-        AVFrame *get();
+        AVFrame* get();
         void put(AVFrame *frame);
-
         void push(AVFrame *frame);
-        AVFrame * pop();
-
+        AVFrame* pop();
     private:
         std::mutex stack_mutex_;
         std::stack<AVFrame*> stack_;
         std::condition_variable_any stack_not_empty_;
-
         std::mutex queue_mutex_;
         std::queue<AVFrame *> queue_;
         std::condition_variable_any queue_not_empty_;

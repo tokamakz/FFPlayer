@@ -9,9 +9,7 @@ extern "C" {
 
 namespace simple_player {
     FFPlayer::FFPlayer() {
-        play_status_ = 0;
-        render_interval = 0;
-        close_thread_count_ = 0;
+        render_interval_ = 0;
         render_ = new SDLRender();
         decoder_ = new FFDecoder();
         source_ = new FFSource();
@@ -47,7 +45,9 @@ namespace simple_player {
             return false;
         }
 
-        render_interval = 1000000 / source_->getFrameRate();
+        render_interval_ = 1000000 / source_->getFrameRate();
+
+        LOG(INFO) << "render_interval_ = " << render_interval_;
 
         bRet = decoder_->open(source_->getAVCodecID(), source_->getAVCodecParameters());
         if (!bRet) {
@@ -58,24 +58,17 @@ namespace simple_player {
         frame_queue_.init(1000);
         pkt_queue_.init(1000);
 
-        play_status_ = 1;
         std::thread th_render(&FFPlayer::image_render_thread, this);
         th_render.detach();
         std::thread th_decode(&FFPlayer::video_decode_thread, this);
         th_decode.detach();
         std::thread th_receive(&FFPlayer::receive_stream_thread, this);
         th_receive.detach();
-        close_thread_count_ = 3;
 
         return true;
     }
 
     bool FFPlayer::close() {
-        play_status_ = 0;
-        {
-            std::unique_lock<std::mutex> lock(close_mutex_);
-            close_cond_.wait(close_mutex_, [this]{return (close_thread_count_ == 0);});
-        }
         source_->close();
         decoder_->close();
         render_->close();
@@ -85,7 +78,7 @@ namespace simple_player {
     }
 
     void FFPlayer::receive_stream_thread() {
-        while(play_status_ == 1) {
+        while(true) {
             AVPacket* pkt = av_packet_alloc();
             if (pkt == nullptr) {
                 LOG(ERROR) << "av_packet_alloc fail!";
@@ -101,41 +94,29 @@ namespace simple_player {
 
             pkt_queue_.push(pkt);
         }
-
-        std::lock_guard<std::mutex> lock(close_mutex_);
-        close_thread_count_--;
-        close_cond_.notify_one();
     }
 
     void FFPlayer::video_decode_thread() {
-        while(play_status_ == 1) {
+        while(true) {
             AVPacket* pkt = pkt_queue_.pop();
             AVFrame* frame = frame_queue_.get();
             bool bRet = decoder_->decode(pkt, frame);
+            ::av_packet_unref(pkt);
             if(!bRet) {
                 LOG(ERROR) << "decoder_->decode fail!";
-                ::av_packet_unref(pkt);
+                frame_queue_.put(frame);
                 continue;
             }
-            ::av_packet_unref(pkt);
             frame_queue_.push(frame);
         }
-
-        std::lock_guard<std::mutex> lock(close_mutex_);
-        close_thread_count_--;
-        close_cond_.notify_one();
     }
 
     void FFPlayer::image_render_thread() {
-        while(play_status_ == 1) {
+        while(true) {
             AVFrame* frame = frame_queue_.pop();
             render_->render(frame);
             frame_queue_.put(frame);
-            //::av_usleep(render_interval);
+            ::av_usleep(render_interval_);
         }
-
-        std::lock_guard<std::mutex> lock(close_mutex_);
-        close_thread_count_--;
-        close_cond_.notify_one();
     }
 }
