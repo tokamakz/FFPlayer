@@ -1,6 +1,9 @@
 #pragma once
 
 #include <string>
+#include <mutex>
+#include <atomic>
+#include <condition_variable>
 
 #include "AVPacketQueue.h"
 #include "AVFrameQueue.h"
@@ -21,6 +24,20 @@ namespace simple_player {
         void video_decode_thread();
         void image_render_thread();
         unsigned int render_interval_;
+
+        std::atomic_bool play_status_;
+
+        bool receive_stream_thread_cancel_flag_;
+        std::mutex receive_stream_mutex_;
+        std::condition_variable_any receive_stream_cond_;
+
+        bool video_decode_thread_cancel_flag_;
+        std::mutex video_decode_mutex_;
+        std::condition_variable_any video_decode_cond_;
+
+        bool image_render_thread_cancel_flag_;
+        std::mutex image_render_mutex_;
+        std::condition_variable_any image_render_cond_;
 
         FFSource *source_;
         FFDecoder *decoder_;

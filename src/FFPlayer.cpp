@@ -10,6 +10,10 @@ extern "C" {
 namespace simple_player {
     FFPlayer::FFPlayer() {
         render_interval_ = 0;
+        play_status_ = false;
+        receive_stream_thread_cancel_flag_ = false;
+        video_decode_thread_cancel_flag_ = false;
+        image_render_thread_cancel_flag_ = false;
         render_ = new SDLRender();
         decoder_ = new FFDecoder();
         source_ = new FFSource();
@@ -46,7 +50,6 @@ namespace simple_player {
         }
 
         render_interval_ = 1000000 / source_->getFrameRate();
-
         LOG(INFO) << "render_interval_ = " << render_interval_;
 
         bRet = decoder_->open(source_->getAVCodecID(), source_->getAVCodecParameters());
@@ -55,20 +58,51 @@ namespace simple_player {
             return false;
         }
 
-        frame_queue_.init(1000);
-        pkt_queue_.init(1000);
+        bRet = frame_queue_.init(500);
+        if(!bRet) {
+            LOG(ERROR) << "frame_queue_.init fail!";
+            return false;
+        }
 
-        std::thread th_render(&FFPlayer::image_render_thread, this);
-        th_render.detach();
-        std::thread th_decode(&FFPlayer::video_decode_thread, this);
-        th_decode.detach();
+        bRet = pkt_queue_.init(500);
+        if(!bRet) {
+            LOG(ERROR) << "pkt_queue_.init fail!";
+            return false;
+        }
+
+        play_status_ = true;
+        receive_stream_thread_cancel_flag_ = false;
+        video_decode_thread_cancel_flag_ = false;
+        image_render_thread_cancel_flag_ = false;
+
         std::thread th_receive(&FFPlayer::receive_stream_thread, this);
         th_receive.detach();
+        std::thread th_decode(&FFPlayer::video_decode_thread, this);
+        th_decode.detach();
+        std::thread th_render(&FFPlayer::image_render_thread, this);
+        th_render.detach();
 
         return true;
     }
 
     bool FFPlayer::close() {
+        play_status_ = false;
+
+        {
+            std::unique_lock<std::mutex> locker(receive_stream_mutex_);
+            image_render_cond_.wait(locker, [this]{return image_render_thread_cancel_flag_;});
+        }
+
+        {
+            std::unique_lock<std::mutex> locker(video_decode_mutex_);
+            video_decode_cond_.wait(locker, [this]{return video_decode_thread_cancel_flag_;});
+        }
+
+        {
+            std::unique_lock<std::mutex> locker(receive_stream_mutex_);
+            receive_stream_cond_.wait(locker, [this]{return receive_stream_thread_cancel_flag_;});
+        }
+
         source_->close();
         decoder_->close();
         render_->close();
@@ -78,7 +112,7 @@ namespace simple_player {
     }
 
     void FFPlayer::receive_stream_thread() {
-        while(true) {
+        while(play_status_) {
             AVPacket* pkt = av_packet_alloc();
             if (pkt == nullptr) {
                 LOG(ERROR) << "av_packet_alloc fail!";
@@ -91,13 +125,19 @@ namespace simple_player {
                 av_packet_free(&pkt);
                 break;
             }
-
             pkt_queue_.push(pkt);
+        }
+
+        {
+            std::lock_guard<std::mutex> locker(receive_stream_mutex_);
+            LOG(ERROR) << "receive_stream_thread in cancel";
+            receive_stream_thread_cancel_flag_ = true;
+            receive_stream_cond_.notify_one();
         }
     }
 
     void FFPlayer::video_decode_thread() {
-        while(true) {
+        while(play_status_) {
             AVPacket* pkt = pkt_queue_.pop();
             AVFrame* frame = frame_queue_.get();
             bool bRet = decoder_->decode(pkt, frame);
@@ -109,14 +149,26 @@ namespace simple_player {
             }
             frame_queue_.push(frame);
         }
+
+        {
+            std::lock_guard<std::mutex> locker(video_decode_mutex_);
+            video_decode_thread_cancel_flag_ = true;
+            video_decode_cond_.notify_one();
+        }
     }
 
     void FFPlayer::image_render_thread() {
-        while(true) {
+        while(play_status_) {
             AVFrame* frame = frame_queue_.pop();
             render_->render(frame);
             frame_queue_.put(frame);
             ::av_usleep(render_interval_);
+        }
+
+        {
+            std::lock_guard<std::mutex> locker(image_render_mutex_);
+            image_render_thread_cancel_flag_ = true;
+            image_render_cond_.notify_one();
         }
     }
 }

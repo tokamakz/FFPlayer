@@ -33,6 +33,7 @@ namespace simple_player {
         SDL_DestroyTexture(sdl_texture_);
         SDL_DestroyRenderer(sdl_renderer_);
         SDL_DestroyWindow(sdl_window_);
+        SDL_Quit();
     }
 
     void SDLRender::render(AVFrame* frame) {

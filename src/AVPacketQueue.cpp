@@ -22,16 +22,21 @@ namespace simple_player {
 
     void AVPacketQueue::push(AVPacket *pkt) {
         std::unique_lock<std::mutex> locker(queue_mutex_);
-        not_full_.wait(locker, [this]{return queue_.size() < max_queue_size_;});
-        queue_.push(pkt);
+        bool not_time_out = not_full_.wait_for(locker, std::chrono::seconds(1), [this]{return queue_.size() < max_queue_size_;});
+        if(not_time_out) {
+            queue_.push(pkt);
+        }
         not_empty_.notify_one();
     }
 
     AVPacket * AVPacketQueue::pop() {
         std::unique_lock<std::mutex> locker(queue_mutex_);
-        not_empty_.wait(locker, [this]{return !queue_.empty();});
-        AVPacket *pkt = queue_.front();
-        queue_.pop();
+        bool not_time_out = not_empty_.wait_for(locker, std::chrono::seconds(1), [this]{return !queue_.empty();});
+        AVPacket *pkt = nullptr;
+        if(not_time_out) {
+            pkt = queue_.front();
+            queue_.pop();
+        }
         not_full_.notify_one();
         return pkt;
     }

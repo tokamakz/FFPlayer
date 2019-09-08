@@ -58,6 +58,6 @@ namespace simple_player {
     }
 
     void FFDecoder::close() {
-        ::avcodec_close(av_codec_ctx_);
+        ::avcodec_free_context(&av_codec_ctx_);
     }
 }
