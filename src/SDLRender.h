@@ -10,7 +10,7 @@ namespace simple_player {
         ~SDLRender();
         bool open();
         void close();
-        void render(AVFrame* frame);
+        long render(AVFrame* frame);
 
     private:
         SDL_Window *sdl_window_;

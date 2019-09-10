@@ -10,8 +10,8 @@ namespace simple_player {
 
     bool FFSource::open(const std::string &url) {
         AVDictionary* options = nullptr;
-        av_dict_set(&options, "stimeout", "3000000", 0);
-        av_dict_set(&options, "rtsp_transport", "tcp", 0);
+        //av_dict_set(&options, "stimeout", "3000000", 0);
+        //av_dict_set(&options, "rtsp_transport", "tcp", 0);
 
         int err_code = avformat_open_input(&format_ctx_, url.c_str(), nullptr, &options);
         if (err_code < 0) {

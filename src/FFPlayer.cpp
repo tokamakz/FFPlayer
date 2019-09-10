@@ -3,6 +3,8 @@
 #include <thread>
 
 #include "glog/logging.h"
+
+#include "common.h"
 extern "C" {
 #include "libavutil/time.h"
 }
@@ -20,20 +22,9 @@ namespace simple_player {
     }
 
     FFPlayer::~FFPlayer() {
-        if(render_ != nullptr) {
-            delete render_;
-            render_ = nullptr;
-        }
-
-        if(decoder_ != nullptr) {
-            delete decoder_;
-            decoder_ = nullptr;
-        }
-
-        if(source_ != nullptr) {
-            delete source_;
-            source_ = nullptr;
-        }
+        safe_deletep(render_);
+        safe_deletep(decoder_);
+        safe_deletep(source_);
     }
 
     bool FFPlayer::open(const std::string &url) {
@@ -58,13 +49,13 @@ namespace simple_player {
             return false;
         }
 
-        bRet = frame_queue_.init(500);
+        bRet = frame_queue_.init(1000);
         if(!bRet) {
             LOG(ERROR) << "frame_queue_.init fail!";
             return false;
         }
 
-        bRet = pkt_queue_.init(500);
+        bRet = pkt_queue_.init(1000);
         if(!bRet) {
             LOG(ERROR) << "pkt_queue_.init fail!";
             return false;
@@ -160,9 +151,8 @@ namespace simple_player {
     void FFPlayer::image_render_thread() {
         while(play_status_) {
             AVFrame* frame = frame_queue_.pop();
-            render_->render(frame);
+            ::av_usleep(render_interval_ - render_->render(frame));
             frame_queue_.put(frame);
-            ::av_usleep(render_interval_);
         }
 
         {

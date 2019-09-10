@@ -1,3 +1,4 @@
+#include <chrono>
 #include "SDLRender.h"
 
 #include "glog/logging.h"
@@ -36,7 +37,8 @@ namespace simple_player {
         SDL_Quit();
     }
 
-    void SDLRender::render(AVFrame* frame) {
+    long SDLRender::render(AVFrame* frame) {
+        auto start_time = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
         SDL_UpdateYUVTexture(sdl_texture_, nullptr,
                              frame->data[0], frame->linesize[0],
                              frame->data[1], frame->linesize[1],
@@ -44,5 +46,6 @@ namespace simple_player {
         SDL_RenderClear(sdl_renderer_);
         SDL_RenderCopy(sdl_renderer_, sdl_texture_, nullptr, nullptr);
         SDL_RenderPresent(sdl_renderer_);
+        return std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count() - start_time;
     }
 }
