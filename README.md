@@ -13,6 +13,9 @@ Features
 - using FFmpeg avcodec to decode video stream data as YUV Data.
 - using SDL to render and display YUV data. 
 
+2.0.0
+- not using FFmpeg avformat
+
 
 Build
 ============
