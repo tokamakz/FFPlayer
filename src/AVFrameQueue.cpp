@@ -27,7 +27,6 @@ namespace simple_player {
         }
     }
 
-    //申请
     AVFrame* AVFrameQueue::get() {
         std::unique_lock<std::mutex> locker(stack_mutex_);
         bool not_time_out = stack_not_empty_.wait_for(locker, std::chrono::seconds(1), [this]{return !stack_.empty();});
@@ -39,21 +38,18 @@ namespace simple_player {
         return frame;
     }
 
-    //回收
     void AVFrameQueue::put(AVFrame *frame) {
         std::lock_guard<std::mutex> locker(stack_mutex_);
         stack_.push(frame);
         stack_not_empty_.notify_one();
     }
 
-    //解码后放到队列里面去；
     void AVFrameQueue::push(AVFrame *frame) {
         std::lock_guard<std::mutex> locker(queue_mutex_);
         queue_.push(frame);
         queue_not_empty_.notify_one();
     }
 
-    //渲染前从队列里取出来；
     AVFrame* AVFrameQueue::pop() {
         std::unique_lock<std::mutex> locker(queue_mutex_);
         bool not_time_out = queue_not_empty_.wait_for(locker,std::chrono::seconds(1), [this]{return !queue_.empty();});

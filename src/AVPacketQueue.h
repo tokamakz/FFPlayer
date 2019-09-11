@@ -20,7 +20,7 @@ namespace simple_player {
 
     private:
         int max_queue_size_;
-        std::queue<AVPacket *> queue_;
+        std::queue<AVPacket*> queue_;
         std::condition_variable not_empty_;
         std::condition_variable not_full_;
         std::mutex queue_mutex_;

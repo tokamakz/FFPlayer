@@ -11,7 +11,7 @@
     } \
     (void)0
 
-// please use the safe_freepa(T[]) to free an array,//std::this_thread::sleep_for(std::chrono::seconds(5));
+// please use the safe_freepa(T[]) to free an array,
 // or the behavior is undefined.
 #define safe_deletepa(pa) \
     if (pa) { \

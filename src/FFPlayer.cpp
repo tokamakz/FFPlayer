@@ -117,7 +117,7 @@ namespace simple_player {
         while(play_status_) {
             AVFrame* frame = frame_queue_.pop();
             long sleep_time = render_interval_ - render_->render(frame);
-            //LOG(ERROR) << "sleep_time " << sleep_time;
+            LOG(INFO) << "sleep_time " << sleep_time;
             ::av_usleep(sleep_time);
             frame_queue_.put(frame);
         }
