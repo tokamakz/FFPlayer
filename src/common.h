@@ -1,5 +1,7 @@
 #pragma once
 
+#include "glog/logging.h"
+
 // free the p and set to NULL.
 // p must be a T*.
 #define safe_deletep(p) \
