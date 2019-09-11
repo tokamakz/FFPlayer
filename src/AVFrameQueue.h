@@ -23,9 +23,9 @@ namespace simple_player {
     private:
         std::mutex stack_mutex_;
         std::stack<AVFrame*> stack_;
-        std::condition_variable_any stack_not_empty_;
+        std::condition_variable stack_not_empty_;
         std::mutex queue_mutex_;
         std::queue<AVFrame *> queue_;
-        std::condition_variable_any queue_not_empty_;
+        std::condition_variable queue_not_empty_;
     };
 }
