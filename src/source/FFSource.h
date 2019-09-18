@@ -19,10 +19,6 @@ namespace simple_player {
             return format_ctx_->streams[stream_type_]->codecpar->codec_id;
         }
 
-        AVCodecParameters *getAVCodecParameters() const {
-            return format_ctx_->streams[stream_type_]->codecpar;
-        }
-
         double getFrameRate() const {
             return av_q2d(format_ctx_->streams[stream_type_]->r_frame_rate);
         }

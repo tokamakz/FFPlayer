@@ -1,5 +1,6 @@
 #include "FFPlayer.h"
 #include "common.h"
+#include "source/rtsp/RTSPClient.h"
 extern "C" {
 #include "libavutil/time.h"
 }
@@ -13,7 +14,7 @@ namespace simple_player {
         image_render_thread_ = nullptr;
         render_ = new SDLRender();
         decoder_ = new FFDecoder();
-        source_ = new FFSource();
+        source_ = new RTSPClient();
     }
 
     FFPlayer::~FFPlayer() {
@@ -38,7 +39,7 @@ namespace simple_player {
         render_interval_ = 1000000 / source_->getFrameRate();
         LOG(INFO) << "render_interval_ = " << render_interval_;
 
-        bRet = decoder_->open(source_->getAVCodecID(), source_->getAVCodecParameters());
+        bRet = decoder_->open(source_->getAVCodecID());
         if (!bRet) {
             LOG(ERROR) << "decoder_->open fail!";
             return false;
@@ -59,7 +60,7 @@ namespace simple_player {
         play_status_ = true;
         receive_stream_thread_ = new std::thread(&FFPlayer::receive_stream_thread_body, this);
         video_decode_thread_ = new std::thread(&FFPlayer::video_decode_thread_body, this);
-        image_render_thread_ = new std::thread(&FFPlayer::image_render_thread_body, this);
+        //image_render_thread_ = new std::thread(&FFPlayer::image_render_thread_body, this);
 
         return true;
     }
@@ -88,12 +89,21 @@ namespace simple_player {
                 break;
             }
 
+            int iRet = av_new_packet(pkt, 900000);
+            if(iRet != 0) {
+                LOG(ERROR) << "av_new_packet fail!";
+                break;
+            }
+
+            pkt->pos = 0;
+
             bool bRet = source_->read_frame(pkt);
             if(!bRet) {
                 LOG(ERROR) << "source_->read_frame fail!";
                 av_packet_free(&pkt);
                 break;
             }
+            LOG(ERROR) << "pkt->pos " << pkt->pos;
             pkt_queue_.push(pkt);
         }
     }
@@ -101,7 +111,13 @@ namespace simple_player {
     void FFPlayer::video_decode_thread_body() {
         while(play_status_) {
             AVPacket* pkt = pkt_queue_.pop();
+            if(pkt == nullptr) {
+                continue;
+            }
             AVFrame* frame = frame_queue_.get();
+            if(frame == nullptr) {
+                continue;
+            }
             bool bRet = decoder_->decode(pkt, frame);
             ::av_packet_unref(pkt);
             if(!bRet) {

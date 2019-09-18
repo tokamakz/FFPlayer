@@ -24,16 +24,26 @@ link_libraries(${PROJECT_SOURCE_DIR}/3rdparty/sdl/lib/libSDL2.a)
 
 include_directories(${PROJECT_SOURCE_DIR}/src)
 
+set(SRC_INFRA
+        src/infra/net/BasicSocket.cpp src/infra/net/BasicSocket.h
+        src/infra/net/TCPSocket.cpp src/infra/net/TCPSocket.h
+        src/infra/net/UDPSocket.cpp src/infra/net/UDPSocket.h)
+
 set(SRC_FFPLAYER
         src/FFPlayer.cpp src/FFPlayer.h
-        src/FFSource.cpp src/FFSource.h
+        src/source/ISource.cpp src/source/ISource.h
+        src/source/rtsp/RTPPacket.h
+        src/source/rtsp/Demuxer.cpp src/source/rtsp/Demuxer.h
+        src/source/rtsp/RTPQueue.cpp src/source/rtsp/RTPQueue.h
+        src/source/rtsp/RTSPClient.cpp src/source/rtsp/RTSPClient.h
+        src/source/FFSource.cpp src/source/FFSource.h
         src/FFDecoder.cpp src/FFDecoder.h
         src/SDLRender.cpp src/SDLRender.h
         src/AVFrameQueue.cpp src/AVFrameQueue.h
         src/AVPacketQueue.cpp src/AVPacketQueue.h)
 
 add_executable(FFPlayer src/main.cpp
-        ${SRC_FFPLAYER})
+        ${SRC_INFRA} ${SRC_FFPLAYER})
 
 target_link_libraries(FFPlayer pthread)
 target_link_libraries(FFPlayer dl)

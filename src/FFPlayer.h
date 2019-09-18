@@ -8,7 +8,7 @@
 
 #include "AVPacketQueue.h"
 #include "AVFrameQueue.h"
-#include "FFSource.h"
+#include "source/ISource.h"
 #include "FFDecoder.h"
 #include "SDLRender.h"
 
@@ -33,7 +33,7 @@ namespace simple_player {
 
         std::atomic_bool play_status_;
 
-        FFSource *source_;
+        ISource *source_;
         FFDecoder *decoder_;
         SDLRender *render_;
 

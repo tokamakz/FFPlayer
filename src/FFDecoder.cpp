@@ -9,7 +9,7 @@ namespace simple_player {
 
     FFDecoder::~FFDecoder() = default;
 
-    bool FFDecoder::open(enum AVCodecID codec_id, const AVCodecParameters *par) {
+    bool FFDecoder::open(enum AVCodecID codec_id) {
         AVCodec* codec = ::avcodec_find_decoder(codec_id);
         if (codec == nullptr) {
             LOG(ERROR) << "Unsupported codec";
@@ -22,13 +22,13 @@ namespace simple_player {
             return false;
         }
 
-        int err_code = ::avcodec_parameters_to_context(av_codec_ctx_, par);
-        if (err_code != 0) {
-            LOG(ERROR) << "avcodec_parameters_to_context ERROR";
-            return false;
-        }
+//         err_code = ::avcodec_parameters_to_context(av_codec_ctx_, par);
+//        if (err_code != 0) {
+//            LOG(ERROR) << "avcodec_parameters_to_context ERROR";
+//            return false;
+//        }
 
-        err_code = ::avcodec_open2(av_codec_ctx_, codec, nullptr);
+        int err_code = ::avcodec_open2(av_codec_ctx_, codec, nullptr);
         if (err_code != 0) {
             LOG(ERROR) << "avcodec_open2 ERROR";
             return false;

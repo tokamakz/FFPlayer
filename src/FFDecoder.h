@@ -9,7 +9,7 @@ namespace simple_player {
     public:
         FFDecoder();
         ~FFDecoder();
-        bool open(enum AVCodecID codec_id, const AVCodecParameters *par);
+        bool open(enum AVCodecID codec_id);
         void close();
         bool decode(AVPacket *pkt, AVFrame* frame);
 
